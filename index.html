@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AppCreative Polina Doos</title>
+    <style>
+    body {
+        background-color: #232F3E;
+        }
+    label, button, p {
+        color: #FF9900;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        margin-left: 40px;
+        }
+    p {
+        color: #ffe9c7;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 16px;
+        margin-left: 40px;
+        }
+    input {
+        color: #232F3E;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        margin-left: 20px;
+        }
+    </style>
+    <script>
+
+        // keep data in localStorage
+        const callLocal = (cityName)=>{         
+            if (localStorage.getItem(cityName)){
+                document.getElementById("apiResult").innerText = localStorage.getItem(cityName)
+            } else {
+                callAPI(cityName)
+            }
+            return document.getElementById("outputCity").innerText = cityName;
+        }
+
+        // define the callAPI function that takes a first name and last name as parameters
+        const callAPI = (cityName)=>{
+            // instantiate a headers object
+            const acHeaders = new Headers();
+            // add content type header to object
+            acHeaders.append("Content-Type", "application/json");
+            // using built in JSON utility package turn object to string and store in a variable
+            const raw = JSON.stringify({"cityName":cityName});
+            // create a JSON object with parameters for API call and store in a variable
+            const requestOptions = {
+                method: 'POST',
+                headers: acHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            // make API call with parameters and use promises to get response
+            fetch("https://sexg4yhbu6.execute-api.eu-central-1.amazonaws.com/dev1", requestOptions)
+            .then(response => response.text())
+            .then(result => localStorage.setItem(cityName, serializer(JSON.parse(result).body)))
+            .then(data => document.getElementById("apiResult").innerText = localStorage.getItem(cityName))
+            .catch(error => console.log('error', error));
+        }
+
+        const serializer = (incomeObject)=>{
+            if (incomeObject[0] != '"'){
+                // alternative:
+                // let content = ''
+                // for (let key in incomeObject) {
+                //     console.log(key)
+                //     content += `${key}: ${incomeObject[key]}\n`;
+                // }
+                // return content;
+                return `Temprature: ${incomeObject.Temprature} °C\n
+                        Weather conditions: ${incomeObject['Weather conditions']}\n
+                        Wind: ${incomeObject.Wind} km/h\n
+                        Wind direction: ${incomeObject['Wind dir']}\n
+                        Pressure: ${incomeObject.Pressure}\n
+                        Humidity: ${incomeObject.Humidity}
+                        `
+            }
+            return 'Type correct city name'
+        }
+    </script>
+</head>
+<body>
+    <form>
+        <label>Input City:</label>
+        <input type="text" id="city">
+        <button type="button" onclick="callLocal(document.getElementById('city').value)">Search</button>
+    </form>
+    <p>
+        <span>Results for city: </span>
+        <span id="outputCity"></span>
+    </p><br>
+    <p id='apiResult'></p>
+</body>
+</html>
